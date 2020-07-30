@@ -1,0 +1,208 @@
+
+<script>
+	var ast = JSON.parse(`{
+  "type": "Program",
+  "body": [
+    {
+      "type": "VariableDeclaration",
+      "declarations": [
+        {
+          "type": "VariableDeclarator",
+          "id": {
+            "type": "Identifier",
+            "name": "hello",
+            "range": [
+              4,
+              9
+            ]
+          },
+          "init": {
+            "type": "Literal",
+            "value": "hello world!",
+            "raw": "\'hello world!\'",
+            "range": [
+              12,
+              26
+            ]
+          },
+          "range": [
+            4,
+            26
+          ]
+        }
+      ],
+      "kind": "var",
+      "range": [
+        0,
+        27
+      ]
+    },
+    {
+      "type": "ExpressionStatement",
+      "expression": {
+        "type": "AssignmentExpression",
+        "operator": "=",
+        "left": {
+          "type": "Identifier",
+          "name": "hello",
+          "range": [
+            28,
+            33
+          ]
+        },
+        "right": {
+          "type": "Literal",
+          "value": "hello",
+          "raw": "\'hello\'",
+          "range": [
+            36,
+            43
+          ]
+        },
+        "range": [
+          28,
+          43
+        ]
+      },
+      "range": [
+        28,
+        44
+      ]
+    },
+    {
+      "type": "FunctionDeclaration",
+      "id": {
+        "type": "Identifier",
+        "name": "hello_world",
+        "range": [
+          54,
+          65
+        ]
+      },
+      "params": [],
+      "body": {
+        "type": "BlockStatement",
+        "body": [
+          {
+            "type": "ExpressionStatement",
+            "expression": {
+              "type": "AssignmentExpression",
+              "operator": "=",
+              "left": {
+                "type": "Identifier",
+                "name": "hello",
+                "range": [
+                  71,
+                  76
+                ]
+              },
+              "right": {
+                "type": "Literal",
+                "value": "hello world",
+                "raw": "\'hello world\'",
+                "range": [
+                  79,
+                  92
+                ]
+              },
+              "range": [
+                71,
+                92
+              ]
+            },
+            "range": [
+              71,
+              93
+            ]
+          }
+        ],
+        "range": [
+          67,
+          95
+        ]
+      },
+      "generator": false,
+      "expression": false,
+      "async": false,
+      "range": [
+        45,
+        95
+      ]
+    },
+    {
+      "type": "ExpressionStatement",
+      "expression": {
+        "type": "CallExpression",
+        "callee": {
+          "type": "Identifier",
+          "name": "hello_world",
+          "range": [
+            96,
+            107
+          ]
+        },
+        "arguments": [],
+        "range": [
+          96,
+          109
+        ]
+      },
+      "range": [
+        96,
+        110
+      ]
+    }
+  ],
+  "sourceType": "module",
+  "range": [
+    0,
+    110
+  ]
+}`);
+	//console.log(ast);
+    var solution = [];
+    function traverse(ast){
+        const entries = Object.entries(ast);
+        entries.forEach(function(element){ 
+            if(Array.isArray(element[1])){
+                traverse(element[1]);
+            }else if(Object.keys(element[1]).includes("body")){
+                //console.log(element[1]);
+                solution.push(element[1]);
+                traverse(element[1].body);
+            }
+            else if(isNode(element[1])){
+                //console.log(element[1]);
+                solution.push(element[1]);
+            }
+        });
+    }
+    function isNode(node){
+        return typeof node === 'object';
+    }
+    function constraint_rules(){
+        const expressionstatement = solution.filter(element => element.type === "ExpressionStatement");
+        const functiondeclaration = solution.filter(element => element.type === "FunctionDeclaration");
+        const variabledeclaration = solution.filter(element => element.type === "VariableDeclaration");
+        console.log(expressionstatement);
+        console.log(functiondeclaration);
+        console.log(variabledeclaration);
+        if(variabledeclaration[0].declarations[0].id.name != expressionstatement[0].expression.left.name){
+            console.log("Names of variable does not match");
+        }else if(variabledeclaration[0].range[1] > expressionstatement[0].range[0]){
+            console.log("Variable declarations should precede the expression statement");
+        }else if(variabledeclaration[0].declarations[0].id.name != expressionstatement[1].expression.left.name){
+            console.log("Names of variable does not match - 2");
+        }else if(variabledeclaration[0].range[1] > expressionstatement[1].range[0]){
+            console.log("Variable declarations should precede the expression statement - 2");
+        }else if(functiondeclaration[0].id.name != expressionstatement[2].expression.callee.name){
+            console.log("Names of functions called does not match");
+        }else if(functiondeclaration[0].range[1] > expressionstatement[2].range[0]){
+            console.log("Function declarations should precede the callee expression");
+        }
+    }
+    
+    traverse(ast);
+    constraint_rules();
+    
+</script>
